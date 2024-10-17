@@ -6,114 +6,155 @@
 </head>
 <body>
 
-<div id="mapa" style="height: 400px; width: 600px; border: 1px solid"></div>
+<div id="mapa" style="height: 800px; width: max;"></div>
 <br>
-<input type="button" value="Brasil Federacao" onclick="brasilFederacao()">
-<input type="button" value="Brasil Mesorregiao" onclick="brasilMesorregiao()">
-<input type="button" value="Brasil Microrregiao" onclick="brasilMicroregiao()">
-<input type="button" value="Brasil Município" onclick="brasilMunicipio()">
+<!-- <input list="states" onclick="brasilPorEstado(this)"> -->
+
+<select name="states" id="states" onchange="brasilPorEstado(this)">
+    <option value=""></option> 
+    <option value="ac">ac</option> 
+    <option value="al">al</option> 
+    <option value="am">am</option> 
+    <option value="ap">ap</option> 
+    <option value="ba">ba</option> 
+    <option value="ce">ce</option> 
+    <option value="df">df</option> 
+    <option value="es">es</option> 
+    <option value="go">go</option> 
+    <option value="ma">ma</option> 
+    <option value="mt">mt</option> 
+    <option value="ms">ms</option> 
+    <option value="mg">mg</option> 
+    <option value="pa">pa</option> 
+    <option value="pb">pb</option> 
+    <option value="pr">pr</option> 
+    <option value="pe">pe</option> 
+    <option value="pi">pi</option> 
+    <option value="rj">rj</option> 
+    <option value="rn">rn</option> 
+    <option value="ro">ro</option> 
+    <option value="rs">rs</option> 
+    <option value="rr">rr</option> 
+    <option value="sc">sc</option> 
+    <option value="se">se</option> 
+    <option value="sp">sp</option> 
+    <option value="to">to</option> 
+</select>
+
+<select name="types" id="types" onchange="brasilPorTipoEvento(this)">
+    <option value=""></option> 
+    <option value="SECA">SECA</option> 
+    <option value="INCENDIO">INCENDIO</option> 
+    <option value="CALOR">CALOR</option> 
+    <option value="FRIO">FRIO</option> 
+    <option value="INUNDACAO">INUNDACAO</option> 
+    <option value="DESLIZAMENTO">DESLIZAMENTO</option>
+</select>
+
+
 <br>
 <br>
-<input type="button" value="Brasil -> Mesorregiao" onclick="brasilGoToMesorregiao()">
-<input type="button" value="Brasil -> Microrregiao" onclick="brasilGoToMicroregiao()">
-<input type="button" value="Brasil -> Município" onclick="brasilGoToMunicipio()">
-<input type="button" value="Município 6 digitos" onclick="municipio6Digitos()">
+<script src="./dist/mapa-brasil.min.js"></script>
 
 <script type="text/javascript">
-    function brasilFederacao() {
-        MapaBrasil(document.getElementById('mapa'), {
-            unidadeData: [
-                {codIbge: 52, fillColor: '#d82b40'},
-                {codIbge: 43, fillColor: '#d82b40'},
-                {codIbge: 11, fillColor: '#ffa700', strokeColor: '#008744', strokeWidth: 4},
-            ],
-            onClick: function (data) {console.log(data)}
-        });
+    let eventType = ""
+    let uf = ""
+
+    const COLORS = {
+        "SECA": "#838500",
+	    "INCENDIO": "#d42600",
+        "CALOR": "#f7fb00",
+        "FRIO": "#006f85",
+        "INUNDACAO": "#450085",
+        "DESLIZAMENTO": "#92926c",
     }
 
-    function brasilMunicipio() {
-        MapaBrasil(document.getElementById('mapa'), {
+    const FEDERACAO = {
+        "ac": 12,
+        "al": 27,
+        "am": 13,
+        "ap": 16,
+        "ba": 29,
+        "ce": 23,
+        "df": 53,
+        "es": 32,
+        "go": 52,
+        "ma": 21,
+        "mt": 51,
+        "ms": 50,
+        "mg": 31,
+        "pa": 15,
+        "pb": 25,
+        "pr": 41,
+        "pi": 22,
+        "rj": 33,
+        "rn": 24,
+        "ro": 11,
+        "rs": 43,
+        "rr": 14,
+        "sc": 42,
+        "se": 28,
+        "sp": 35,
+        "to": 17
+    }
+
+    function getDataAndDrawMap(url) {
+        fetch(url, {
+            method : "GET",
+        }).then(
+            async response => {
+                const data = await response.json()
+                let chartData = []
+                if (data != null) {
+                    chartData = data.map(e => {
+                        return {
+                            codIbge: e.city.id,
+                            fillColor: COLORS[e.eventType]
+                        };
+                    })
+                }
+                
+                drawMap(chartData)
+            }
+        ).then(
+            html => console.log(html)
+        );
+    };
+
+    function drawMap(chartData) {
+        if (uf !== "") {
+            MapaBrasil(document.getElementById('mapa'), {
+            unidade: FEDERACAO[uf],
             regiao: 'municipio',
+            unidadeData: chartData,
             onClick: function (data) {console.log(data)}
         });
-    }
-
-    function brasilMesorregiao() {
-        MapaBrasil(document.getElementById('mapa'), {
-            regiao: 'mesorregiao',
-            onClick: function (data) {console.log(data)}
-        });
-    }
-
-    function brasilMicroregiao() {
-        MapaBrasil(document.getElementById('mapa'), {
-            regiao: 'microrregiao',
-            onClick: function (data) {console.log(data)}
-        });
-    }
-
-    // GO TO
-    function brasilGoToMunicipio() {
-        MapaBrasil(document.getElementById('mapa'), {
-            onClick: function (data) {
-                console.log(data);
-                MapaBrasil(document.getElementById('mapa'), {
-                    unidade: data.codIbge,
-                    regiao: 'municipio',
-                    onClick: function (data) {
-                        console.log(data)
-                    }
-                });
-            }
-        });
-    }
-
-    function brasilGoToMesorregiao() {
-        MapaBrasil(document.getElementById('mapa'), {
-            onClick: function (data) {
-                console.log(data);
-                MapaBrasil(document.getElementById('mapa'), {
-                    unidade: data.codIbge,
-                    regiao: 'mesorregiao',
-                    onClick: function (data) {
-                        console.log(data)
-                    }
-                });
-            }
-        });
-    }
-
-    function brasilGoToMicroregiao() {
-        MapaBrasil(document.getElementById('mapa'), {
-            onClick: function (data) {
-                console.log(data);
-                MapaBrasil(document.getElementById('mapa'), {
-                    unidade: data.codIbge,
-                    regiao: 'microrregiao',
-                    onClick: function (data) {
-                        console.log(data)
-                    }
-                });
-            }
-        });
-    }
-
-    function municipio6Digitos(){
-        MapaBrasil(document.getElementById('mapa'), {
-            unidade: 11,
+        } else {
+            MapaBrasil(document.getElementById('mapa'), {
             regiao: 'municipio',
-            unidadeData: [
-                {codIbge: 110001, fillColor: '#d82b40'}
-            ],
-            onClick: function (data) {
-                console.log(data)
-            }
+            unidadeData: chartData,
+            onClick: function (data) {console.log(data)}
         });
+        }
     }
 
-    window.onload = function () {
-        brasilFederacao();
+
+    function brasilPorEstado(event) {
+        console.log(event.value)
+        uf = event.value
+        const url = `http://localhost:5000/events?type=${eventType}&uf=${uf}`
+        getDataAndDrawMap(url)
     }
+
+    function brasilPorTipoEvento(event) {
+        console.log(event.value)
+        eventType = event.value
+        const url = `http://localhost:5000/events?type=${eventType}&uf=${uf}`
+        getDataAndDrawMap(url)
+    }
+
+
+    getDataAndDrawMap("http://localhost:5000/events")
 </script>
 
 </body>

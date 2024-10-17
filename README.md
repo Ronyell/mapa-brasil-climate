@@ -93,3 +93,15 @@ MapaBrasil(document.getElementById('mapa'), {
 ```
 
 ![Exemplo 002](https://raw.githubusercontent.com/clagomess/mapa-brasil/master/exemplos/exemplo_002.png)
+
+
+## Como executar
+
+- Instala as dependencias: `npm install`
+- Instala o server: `npm install -g http-server`
+- Faz o build do pacote `npm run build`
+- Executa o server `http-server -c-1`
+
+Acesse no browser http://localhost:8080/
+
+![alt text](https://raw.githubusercontent.com/ronyell/mapa-brasil-climate/master/exemplos/image.png)
